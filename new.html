@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+svg {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.bar-chart rect {
+  fill: steelblue;
+
+}
+.bar-chart{
+display: inline;
+  float:left;
+  margin-left: 80px;
+}
+.bar:hover {
+  fill: brown;
+}
+
+.bar-chart text {
+  fill: black;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+#legend {
+  float:center;
+    text-align:center;
+  font-family: Avenir, Arial, Helvetica, sans-serif;
+  padding-top:20px;
+}
+#legend2 {
+  float:right;
+    text-align:center;
+  font-family: Avenir, Arial, Helvetica, sans-serif;
+  padding-top:20px;
+}
+#legend2 h2 {
+  font-size:1.2em;
+  font-style:inherit;
+  margin: 0;
+  padding: 0;
+  color:red;
+}
+#legend h2 {
+  font-size:1.2em;
+  font-style:inherit;
+  margin: 0;
+  padding: 0;
+  color:red;
+}
+#legend2 p {
+  font-size:.9em;
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+  font-variant:small-caps;
+}
+#legend p {
+  font-size:.9em;
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+  font-variant:small-caps;
+}
+#graphbar {
+  margin-top: 50px;
+text-align: right;
+float:right;
+display: inline;
+
+}
+
+.arc text {
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+.arc path {
+  stroke: #fff;
+}
+
+</style>
+<body>
+   <h2></h2>
+   <div id="legend">&nbsp;</div>
+   <svg class="bar-chart"></svg>
+   <div id="graphbar">&nbsp;</div>
+   <div id="legend2">&nbsp;</div>
+   <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</body>
+<script>
+
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 460- margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+var x_scale = d3.scale.ordinal().rangeRoundBands([0,4000], 0);
+var y_scale = d3.scale.linear().range([height,0]);
+
+var x_axis = d3.svg.axis().scale(x_scale).orient("bottom").tickFormat("");
+var y_axis = d3.svg.axis().scale(y_scale).orient("left").ticks(10);
+
+var bar_chart = d3.select(".bar-chart")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+.append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("movie_metadata.csv", function(error,data) {
+
+   // error check
+   if (error) throw error;
+   // store data into global var
+
+    data.forEach(function(d) {
+      if(!d.title_year){
+          d.title_year=1917;
+        }
+    });
+
+      var sum=1000;
+     function countyear(year){
+      var count=0;
+      data.forEach(function(d) {
+      if(d.title_year==year){
+        count++;
+      }
+    });
+     return count;
+    }
+
+     var years=[];
+    for(i=0;i<=1000;i++){
+      years[i]=i+1916;
+     }
+
+
+     var years2=[];
+     for(i=0;i<=1000;i++){
+      years2[i]=countyear(years[i]);
+     }
+
+     var text='[';
+
+  for(i=0;i<1000;i++)
+  {
+    text=text+'{ "name":'+years[i]+' , "years2":'+years2[i]+'},';
+  }
+  text=text.slice(0,-1);
+  text=text+']';
+  //document.write(text);
+  dataa = JSON.parse( text );
+   dataset = dataa; // store data into global var
+
+   dataset.forEach(function(d) {
+      d.years22 = +d.years2;
+   });
+
+
+   x_scale.domain(dataa.map(function(d) { return d.name; }));
+   y_scale.domain([0, d3.max(dataset, function(d) { return d.years22; })]);
+
+   bar_chart.append("g").attr("class", "x axis").attr("transform", "translate(0, " + height + ")").call(x_axis)
+   .style("text-anchor", "end");
+
+   bar_chart.append("g").attr("class", "y axis").call(y_axis).append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("# Of Movies");
+
+  bar_chart.selectAll(".bar").data(dataset).enter().append("rect")
+    .attr("class", function(d) { return x_scale(d.name); })
+    .attr("x",function(d) { return x_scale(d.name); })
+    .attr("width", x_scale.rangeBand())
+    .attr("y", function(d) { return y_scale(d.years22); })
+    .attr("height", function(d) { return height - y_scale(d.years22); })
+    .on("mouseover",update_legend)
+    .on("mouseout",remove_legend);
+
+
+    var legend = d3.select("#legend")
+  function update_legend(d)
+    {
+      //alert(d.name);
+      var fraphbar = d3.select("#graphbar");
+        fraphbar.html("<p><h2></h2></p>");
+      legend.html("<p><p><p><p><h2>Year:"+d.name+"</h2><p> Movies in this year:"+d.years2+"</p>");
+      legend.transition().duration(200).style("opacity","1");
+      scoreGraph(d.name);
+    }
+    function remove_legend(d)
+    {
+        //legend.transition().duration(1000).style("opacity","0");
+        
+//        legend.html("<h2>&nbsp;</h2>")
+    }
+
+    function scoreGraph(num){
+      var names=[];
+      var numofg=[];
+        names[0]="Action";
+        names[1]="Documentary";
+        names[2]="Adventure";
+        names[3]="Drama";
+        names[4]="Animation";
+        names[5]="Comedy";
+        names[6]="Mystery";
+        names[7]="Fantasy";
+        names[8]="Crime";
+        names[9]="Biography";
+        names[10]="Sci-Fi";
+        names[11]="Horror";
+        names[12]="Romance";
+        names[13]="Thriller";
+        names[14]="Game-Show";
+        names[15]="Family";
+        names[16]="Music";
+        names[17]="Western";
+        names[18]="Musical";
+        names[19]="Film-Noir";
+        names[20]="History";
+        for(i=0;i<21;i++){
+          numofg[i]=0;
+        }
+
+        data.forEach(function(d) {
+        if(d.title_year==num){
+          if(d.genres1=="Action"){
+            numofg[0]++;
+          }
+          if(d.genres1=="Documentary"){
+            numofg[1]++;
+          }
+         if(d.genres1=="Adventure"){
+          numofg[2]++;
+         }
+          if(d.genres1=="Drama"){
+            numofg[3]++;
+          }
+          if(d.genres1=="Animation"){
+            numofg[4]++;
+          }
+          if(d.genres1=="Comedy"){
+            numofg[5]++;
+          }
+          if(d.genres1=="Mystery"){
+            numofg[6]++;
+          }
+          if(d.genres1=="Fantasy"){
+            numofg[7]++;
+          }
+          if(d.genres1=="Crime"){
+            numofg[8]++;
+          }
+          if(d.genres1=="Biography"){
+            numofg[9]++;
+          }
+          if(d.genres1=="Sci-Fi"){
+            numofg[10]++;
+          }
+          if(d.genres1=="Horror"){
+            numofg[11]++;
+          }
+          if(d.genres1=="Romance"){
+            numofg[12]++;
+          }
+          if(d.genres1=="Thriller"){
+            numofg[13]++;
+          }
+          if(d.genres1=="Game-Show"){
+            numofg[14]++;
+          }
+          if(d.genres1=="Family"){
+            numofg[15]++;
+          }
+          if(d.genres1=="Music"){
+            numofg[16]++;
+          }
+          if(d.genres1=="Western"){
+            numofg[17]++;
+          }
+          if(d.genres1=="Musical"){
+            numofg[18]++;
+          }
+          if(d.genres1=="Film-Noir"){
+            numofg[19]++;
+          }
+          if(d.genres1=="History"){
+            numofg[20]++;
+          }
+        }
+      }
+     )
+
+    
+
+    var text1='[';
+
+  for(i=0;i<21;i++)
+  {
+    text1=text1+'{ "age":'+'"'+names[i]+'"'+' , "population":'+numofg[i]+'},';
+  }
+  text1=text1.slice(0,-1);
+  text1=text1+']';
+  //alert(text1);
+  //document.write(text);
+  dataj = JSON.parse( text1 );
+  //alert(dataj);
+
+
+  var width1 = 700,
+    height1 = 300,
+    radius1 = Math.min(width1, height1) / 2;
+
+var color1 = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+var hue = d3.scale.category10();
+var arc = d3.svg.arc()
+    .outerRadius(radius1 - 10)
+    .innerRadius(0);
+
+var labelArc = d3.svg.arc()
+    .outerRadius(radius1 - 40)
+    .innerRadius(radius1 - 40);
+
+var pie = d3.layout.pie()
+    .sort(null)
+    .value(function(d) { return d.population; });
+
+var svg1 = d3.select("#graphbar").append("svg")
+    .attr("width", width1)
+    .attr("height", height1)
+  .append("g")
+    .attr("transform", "translate(" + width1 / 2 + "," + height1 / 2 + ")");
+
+
+
+  var g = svg1.selectAll(".arc")
+      .data(pie(dataj))
+    .enter().append("g")
+      .attr("class", "arc");
+      
+
+  g.append("path")
+      .attr("d", arc)
+      .style("fill", function(d) { return hue(d.age); })
+      .on("mouseover",update_legend2)
+      .on("mouseout",remove_legend2);
+      
+
+  g.append("text")
+      .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
+      .attr("dy", ".35em")
+      .text(function(d) { return d.age; })
+      .style("fill", function(d) { return hue(d.population); })
+
+      
+
+
+    var legend = d3.select("#legend2")
+  function update_legend2(d)
+    {
+      //alert(".name");
+      var fraphbar2 = d3.select("#legend2");
+        //legend.html("<p><h2></h2></p>");
+      legend.html("<p><p><p><p><h2>genre:"+d.population+"</h2><p> Movies in this genre:"+d.population+"</p>");
+      legend.transition().duration(200).style("opacity","1");
+    }
+    function remove_legend2(d)
+    {
+        legend.transition().duration(1000).style("opacity","0");
+        legend.html("<p><h2></h2></p>");
+
+//        legend.html("<h2>&nbsp;</h2>")
+    }
+
+
+function type(d) {
+  d.population = +d.population;
+  return d;
+}
+
+
+}//end fun
+
+
+
+
+});
+
+
+</script>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head><style>
+body{margin:0px; 	  font: 10px sans-serif  ;}
+rect {fill:#F0FFFF; }
+circle {opacity:.5;}
+
+rect:hover
+
+  {
+	    opacity: 0;
+
+  }
+
+circle:hover
+
+  {
+	    stroke: black;
+  }
+  
+  ul{
+	list-style-type: none;
+	position: absolute;
+	margin: 10px;
+	
+  right: 50%;
+
+}
+
+li{
+	border-radius: 50%;
+	width: 20px;
+	height: 20px; 
+	background-color:  #2db9af ;
+	display:inline-block;
+	padding:5px;
+	text-align: center;
+
+
+}
+
+p{
+	font-size: 18px;
+    font-weight: bold;
+	text-align: center;
+	color:  	#008080;
+}
+</style></head>
+<body>
+<p>Motor Vehicle Occupant Death Rate: by Gender</p>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+		<div id="pages">
+		<ul>
+				<a href="a.html"><li id="c1" > </li></a>
+				<a href="b.html"><li id="c2" > </li></a>
+		</ul>
+		</div>
+
+
+<script>
+var fill = d3.scale.category10();
+///circle {fill:steelblue;opacity:.5;}
+
+var width = 5000,
+    height = 5000, 
+    margin = 50;
+
+var cwidth=100,cheight=100,cmargin=5,maxr=5;
+
+var svg=d3.select("body").append("svg");
+var x=d3.scale.linear().domain([0,30]).range([cmargin,cwidth-margin]);
+var y=d3.scale.linear().domain([0,30]).range([cheight-cmargin,cmargin]);
+var o=d3.scale.linear().domain([0,300000]).range([.5,100]);//.5
+
+
+var data;
+d3.csv("Mot.csv",function(csv) {
+
+
+  data=d3.nest()
+    .key(function(d) {return d.State;})
+    .entries(csv);
+
+	
+	svg.attr("width",1200);
+	svg.attr("height",700);
+
+   
+  
+  var g=svg.selectAll("g").data(data).enter()
+    .append("g")
+    .attr("transform",function(d,i,u) { 
+				if((i%11)==0)
+				{
+					j=(i/11);
+					i=0;
+				
+				}
+				i=i%11;				
+				return "translate("+(100*i+50)+","+(+(j*110)+80)+")";});
+
+  g
+    .append("rect")
+    .attr("x",cmargin)
+    .attr("y",cmargin)
+    .attr("width",cwidth-2*cmargin)
+    .attr("height",cheight-2*cmargin)
+      .append("title")
+      .text(function(d) {return d.State;})
+  g
+    .append("text")
+    .attr("y",cheight+10)
+    .attr("x",cmargin)
+    .text(function(d) {return d.key;})
+  
+  g.selectAll("circle")
+  .data(function(d) {return d.values}) 
+  .enter()
+      .append("circle")
+            .attr("r",function(d) {return (d.Male);})
+      .attr("cx",function(d) {return x(+d.Male);})
+      .attr("cy",function(d) {return y(+0.5*d.Male);})
+	  .style("fill", " 	#90EE90")
+      .append("title")
+        .text("Male");
+		
+	g.selectAll("g")
+	.data(function(d) {return d.values})
+	.enter()
+	.append("circle")
+    .attr("r",function(d) {return (d.Female);})
+    .attr("cx",function(d) {return x(+d.Female);})
+    .attr("cy",function(d) {return y(+d.Female);})
+    .style("fill", "#FF69B4")
+	.append("title")
+    .text("Female");
+	  
+	  
+	  	  
+	  
+	  
+	  
+
+svg.style("opacity", 1e-6)
+  .transition()
+    .duration(1500)
+    .style("opacity", 1);
+	  
+
+	 
+
+})
+
+
+
+</script>
+
+
+</body>
+</html>

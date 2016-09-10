@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<style>
+
+circle,
+path {
+  cursor: pointer;
+}
+
+circle {
+  fill: none;
+  pointer-events: all;
+}
+path {
+  stroke: #fff;
+  stroke-width:2;
+}
+
+
+#sunburst {
+text-align: left;
+float:left;
+display: inline;
+}
+#graphbar {
+text-align: right;
+float:right;
+display: inline;
+}
+#main-container{
+  /*float: center;*/
+  height:2000px;
+  /*background-color:   #D3D3D3;*/
+}
+#main{
+  text-align:center;
+  margin-bottom: 2px;
+  font-family: Avenir, Arial, Helvetica, sans-serif;
+  /*padding-top:20px;*/
+}
+#first{
+  text-align:center;
+  margin-bottom: 2px;
+  font-family: Avenir, Arial, Helvetica, sans-serif;
+  padding-top:10px;
+}
+#legend {
+  float:center;
+    text-align:center;
+  font-family: Avenir, Arial, Helvetica, sans-serif;
+  padding-top:20px;
+}
+#legend h2 {
+  font-size:1.2em;
+  font-style:inherit;
+  margin: 0;
+  padding: 0;
+  color:red;
+}
+#legend p {
+  font-size:.9em;
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+  font-variant:small-caps;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+</style>
+<body>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="colorbrewer.js"></script>
+<link type="text/css" rel="stylesheet" href="colorbrewer.css"/>
+</head>
+<body>
+    <div id="main"><h1>Movies By Genres</h1><p></div>
+    <div id="first">&nbsp;<p></div>
+    
+    <div id=main-container>
+    
+      <div id="sunburst">&nbsp;
+      <div id="legend">&nbsp;</div>
+      </div>
+      <div id="graphbar">&nbsp;</div>
+    </div>
+<script>
+var margin = {top: 250, right: 400, bottom: 250, left: 400},
+    radius = Math.min(margin.top, margin.right, margin.bottom, margin.left)-10;
+
+var hue = d3.scale.category10();
+
+var luminance = d3.scale.sqrt()
+    .domain([0, 1e6])
+    .clamp(true)
+    .range([90, 20]);
+var number=0;
+//visual the graph in the center of th page
+var svg = d3.select("#sunburst").append("svg")
+    .attr("width", margin.left + margin.right)
+    .attr("height", margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var partition = d3.layout.partition()
+    .sort(function(a, b) { return d3.ascending(a.name, b.name); })
+    .size([2 * Math.PI, radius]);
+
+var arc = d3.svg.arc()
+    .startAngle(function(d) { return d.x; })
+    .endAngle(function(d) { return d.x + d.dx; })
+    .padAngle(.01)
+  .padRadius(radius / 3)
+    .innerRadius(function(d) { return radius / 3 * d.depth; })
+    .outerRadius(function(d) { return radius / 3 * (d.depth + 1); });
+
+
+
+d3.csv("movie_metadata.csv", function(error, data) {
+  if (error) throw error;
+  //alert(data.title);
+  var genres1=[];
+  var genres2=[];
+  var genres3=[];
+  var genres4=[];
+  var genres5=[];
+  var genres6=[];
+  var linksImdb=[];
+  var scores=[];
+  var titles=[];
+  var movieNum=0;
+
+ data.forEach(function(d) {
+      genre1=d.genres1;
+      genre2=d.genres2;
+      genre3=d.genres3;
+      genre4=d.genres4;
+      genre5=d.genres5;
+      genre6=d.genres6;
+      linkImdb=d.movie_imdb_link;
+      score=d.imdb_score;
+      title=d.movie_title;
+   /* movie.push(obj);*/
+      genres1.push(genre1);
+      genres2.push(genre2);
+      genres3.push(genre3);
+      genres4.push(genre4);
+      genres4.push(genre4);
+      genres6.push(genre6);
+      linksImdb.push(linkImdb);
+      scores.push(score);
+      titles.push(title);
+      movieNum++;
+  });
+  var genere=[];
+  cnt=0;
+  data.forEach(function(d) {
+    if(d.genere!=""){
+      genere.push(d.genere);
+      cnt++;
+    }
+  });
+
+ /*var t="dan";
+  alert(t.slice(0,-1));*/
+  cnt2=0;
+
+  var text='{"name": "flare","children": [';
+  //alno3 al2wl
+  var arr=[];
+  var count=0;
+  var flag=0;
+
+  var arr2=[];
+  var count2=0;
+  var flag2=0;
+
+
+  var arr3=[];
+  var count3=0;
+  var flag3=0;
+  var count2b=0;
+  var arr2b=[];
+  var count3b=0;
+  var arr3b=[];
+  var res;
+
+
+  for(i=0;i<cnt;i++)
+  {
+    g1=genere[i];
+    //3dd alno3 al2wl mn al2flam
+    count=0;
+    //m7zer arr m5el m7lat ale fyom mn no3 g1
+    for(k=0;k<movieNum;k++){
+      if(genres1[k]==g1){
+          arr[count]=k;
+          count++;
+        }
+        if(genres2[k]==g1){
+          arr[count]=k;
+          count++;
+        }
+        if(genres3[k]==g1){
+          arr[count]=k;
+          count++;
+        }
+    }
+    if(count>0)
+    {
+      flag++;
+      flag2=0;
+      text=text+'{"name":'+' "'+g1+'"'+',"children": [';
+      for(j=0;j<cnt;j++)
+      {
+        g2=genere[j];
+        count2=0;
+        count2b=0;
+        for(l=0;l<count;l++){
+          if(genres1[arr[l]]==g2){
+            arr2[count2]=arr[l];
+            count2++;
+          }
+          if(genres2[arr[l]]==g2){
+            arr2[count2]=arr[l];
+            count2++;
+          }
+          if(genres2[arr[l]]==""){
+            arr2b[count2b]=arr[l];
+            count2b++;
+          }
+          if(genres3[arr[l]]==g2){
+            arr2[count2]=arr[l];
+            count2++;
+          }
+        }
+
+       /* if(count2b>0&&g1!=g2){
+          for(z=0;z<count2b;z++){
+            text=text+'{ "name":'+'"'+titles[arr2b[z]]+'"'+' , "size":'+1+'},';
+            }
+            res=text.slice(-1);
+            if(res==','){
+              text=text.slice(0,-1);
+            }
+            text=text+']},';
+        }
+        res=text.slice(-1);
+        if(res==','){
+           text=text.slice(0,-1);
+        }*/
+
+        if(count2>0&&g1!=g2){
+          flag2++;
+          flag3=0;
+          text=text+'{"name":'+' "'+g2+'"'+',"children": [';
+          for(a=0;a<cnt;a++){
+            g3=genere[a];
+            count3=0;
+            count3b=0;
+            for(m=0;m<count2;m++){
+              if(genres1[arr2[m]]==g3){
+                arr3[count3]=arr2[m];
+                count3++;
+              }
+             if(genres2[arr2[m]]==g3){
+                arr3[count3]=arr2[m];
+                count3++;
+              }
+             if(genres3[arr2[m]]==g3){
+                arr3[count3]=arr2[m];
+                count3++;
+             }
+             if(genres3[arr2[m]]==""){
+                arr3b[count3b]=arr2[m];
+                count3b++;
+             }
+            }
+            /*if(count3b>0&&g1!=g2&&g1!=g3&&g2!=g3){
+              for(x=0;x<count3b;x++){
+                text=text+'{ "name":'+'"'+titles[arr3b[x]]+'"'+' , "size":'+1+'},';
+
+                }
+                res=text.slice(-1);
+                if(res==','){
+                  text=text.slice(0,-1);
+                }
+                text=text+']},';
+            }
+            res=text.slice(-1);
+            if(res==','){
+               text=text.slice(0,-1);
+            }*/
+
+            if(count3>0&&g1!=g2&&g1!=g3&&g2!=g3){
+              flag3++;
+              text=text+'{"name":'+' "'+g3+'"'+',"children": [';
+              for(n=0;n<count3;n++){
+                text=text+'{ "name":'+'"'+titles[arr3[n]]+'"'+' , "size":'+1+',"score":'+scores[arr3[n]]+'},';
+                /*if(n<count3-1)
+                  text=text+',';*/
+               }
+               res=text.slice(-1);
+               if(res==','){
+                text=text.slice(0,-1);
+               }
+               text=text+']},';
+            }
+          }
+          res=text.slice(-1);
+          if(res==','){
+            text=text.slice(0,-1);
+          }
+          text=text+']},';
+        }
+      }//substring
+      res=text.slice(-1);
+      if(res==','){
+        text=text.slice(0,-1);
+      }
+      text=text+']},'
+    }//substring
+
+  }
+  res=text.slice(-1);
+  if(res==','){
+    text=text.slice(0,-1);
+  }
+  text=text+"]}";
+    //alert(text);
+  //document.write(text);
+  //obj = JSON.parse(text); 
+  //java.lang.System.out.println("Leaving function.");
+
+
+});
+
+
+
+
+
+d3.json("flare.json", function(error, root) {
+  if (error) throw error;
+  //alert(root.children[);
+
+  // Compute the initial layout on the entire tree to sum sizes.
+  // Also compute the full name and fill color for each node,
+  // and stash the children so they can be restored as we descend.
+  partition
+      .value(function(d) { return d.size; })
+      .nodes(root)
+      .forEach(function(d) {
+        d._children = d.children;
+        d._name=d.name;
+      // alert (d.name);
+        d.sum = d.value;
+        //alert(d.sum);
+        d.key = key(d);
+        d.fill = fill(d);
+      });
+
+  // Now redefine the value function to use the previously-computed sum.
+  //2 circles 
+  partition
+      .children(function(d, depth) { return depth < 2 ? d._children : null; })
+      .value(function(d) { return d.sum; });
+
+  var center = svg.append("circle")
+      .attr("r", radius / 3)
+      .on("click", zoomOut);
+
+
+  var path = svg.selectAll("path")
+      .data(partition.nodes(root).slice(1))
+    .enter().append("path")
+    //.attr("class", function(d) { return d.name; })
+      .attr("d", arc)
+      .style("fill", function(d) { return d.fill; })
+      .each(function(d) { this._current = updateArc(d); })
+     .on("mouseover",update_legend)
+     //.on("mouseover",hover_effect)
+      .on("mouseout",remove_legend)
+      .on("click", zoomIn);
+  
+  function zoomIn(p) {
+    number++;
+    if(number>3)
+      number=3;
+    if (p.depth > 1) p = p.parent;
+    if (!p.children){
+      return;
+    } 
+    zoom(p, p,1);
+  }
+
+  function zoomOut(p) {
+    number--;
+    if(number<0)
+      number=0;
+    if (!p.parent) return;
+    zoom(p.parent, p,2);
+  }
+  var first = d3.select("#first")
+  // Zoom to the specified new root.
+  function zoom(root, p,num) {
+    if(number<0)
+      number=0;
+    if(number>3)
+      number=3;
+    if(num==1){
+      if(number==3)
+      { 
+        var mov=[];
+        first.html("<h2>Genre 1:"+p.parent.parent.name+", Genre 2:"+p.parent.name+", Genre 3:"+p.name+"</h2>");
+        mov=p.children;
+        scoreGraph(mov);
+        path.attr("class",function(d) { str=replacefun(d.name);
+          return str});
+        //.on("click",hover_effect);
+        //alert(mov);
+      }
+      if(number==2)
+      {
+        first.html("<h2>Genre 1:"+p.parent.name+", Genre 2:"+p.name+"</h2>");
+        var fraphbar = d3.select("#graphbar");
+        fraphbar.html("<p><h2></h2></p>");
+      }
+      if(number==1)
+      {
+        first.html("<h2>Genre 1:"+p.name+"</h2>");
+        var fraphbar = d3.select("#graphbar");
+        fraphbar.html("<p><h2></h2></p>");
+      }
+      if(number==0)
+      {
+        first.html("<h2></h2><p>");
+        var fraphbar = d3.select("#graphbar");
+        fraphbar.html("<p><h2></h2></p>");
+      }
+    }
+    if(num==2){
+      if(number==2)
+      {
+        first.html("<h2>Genre 1:"+root.parent.name+", Genre 2:"+root.name+"</h2>");
+        var fraphbar = d3.select("#graphbar");
+        fraphbar.html("<p><h2></h2></p>");
+
+      }
+      if(number==1)
+      {
+        first.html("<h2>Genre 1:"+root.name+"</h2>");
+      }
+      if(number==0)
+      {
+        first.html("<h2></h2><p>");
+      }
+    }
+    if (document.documentElement.__transition__) return;
+
+    // Rescale outside angles to match the new layout.
+    var enterArc,
+        exitArc,
+        outsideAngle = d3.scale.linear().domain([0, 2 * Math.PI]);
+
+    function insideArc(d) {
+      return p.key > d.key
+          ? {depth: d.depth - 1, x: 0, dx: 0} : p.key < d.key
+          ? {depth: d.depth - 1, x: 2 * Math.PI, dx: 0}
+          : {depth: 0, x: 0, dx: 2 * Math.PI};
+    }
+
+    function outsideArc(d) {
+      return {depth: d.depth + 1, x: outsideAngle(d.x), dx: outsideAngle(d.x + d.dx) - outsideAngle(d.x)};
+    }
+
+
+    center.datum(root);
+
+    // When zooming in, arcs enter from the outside and exit to the inside.
+    // Entering outside arcs start from the old layout.
+    if (root === p) enterArc = outsideArc, exitArc = insideArc, outsideAngle.range([p.x, p.x + p.dx]);
+
+    path = path.data(partition.nodes(root).slice(1), function(d) { return d.key; });
+
+    // When zooming out, arcs enter from the inside and exit to the outside.
+    // Exiting outside arcs transition to the new layout.
+    if (root !== p) enterArc = insideArc, exitArc = outsideArc, outsideAngle.range([p.x, p.x + p.dx]);
+
+    d3.transition().duration(d3.event.altKey ? 7500 : 750).each(function() {
+      path.exit().transition()
+          .style("fill-opacity", function(d) { return d.depth === 1 + (root === p) ? 1 : 0; })
+          .attrTween("d", function(d) { return arcTween.call(this, exitArc(d)); })
+          .remove();
+
+      path.enter().append("path")
+          .style("fill-opacity", function(d) { return d.depth === 2 - (root === p) ? 1 : 0; })
+          .style("fill", function(d) { return d.fill; })
+          .on("mouseover",update_legend)
+           .on("mouseout",remove_legend)
+          .on("click", zoomIn)
+          .each(function(d) { this._current = enterArc(d); });
+
+      path.transition()
+          .style("fill-opacity", 1)
+          .attrTween("d", function(d) { return arcTween.call(this, updateArc(d)); });
+    });
+  }
+
+  function scoreGraph(mov){
+    var names=[];
+    var scorIMDB=[];
+    var margin2 = {top: 120, right: 20, bottom: 5, left: 5},
+    width2 = 500 - margin2.left - margin2.right,
+    height2 = 450 - margin2.top - margin2.bottom;
+
+    var x = d3.scale.ordinal()
+        .rangeRoundBands([0, width2], .1);
+
+    var y = d3.scale.linear()
+        .range([height2, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .ticks(10, "");
+
+    var svg = d3.select("#graphbar").append("svg")
+    .attr("width", width2 + margin2.left + margin2.right)
+    .attr("height", height2 + margin2.top + margin2.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+    x.domain(mov.map(function(d) { return d.name; }));
+    y.domain([0, 10]);
+
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height2 + ")")
+      .style("text-anchor", "end")
+      .call(xAxis)
+      .selectAll("text")  
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)" )
+            .text("Movies");
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("IMDB score");
+
+    svg.selectAll(".bar")
+      .data(mov)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("class", function(d) { str=replacefun(d.name);
+          return str})
+      .on("mouseover",update_legend)
+     //.on("mouseover",hover_effect)
+      .on("mouseout",remove_legend)
+      .attr("x", function(d) { return x(d.name); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.score); })
+      .attr("height", function(d) { return height2 - y(d.score); });
+
+
+
+
+    mov.forEach(function1);
+  }
+  function function1(item)
+  {
+    //alert(item.name)
+  }
+});
+
+function key(d) {
+  var k = [], p = d;
+  while (p.depth) k.push(p.name), p = p.parent;
+  return k.reverse().join(".");
+}
+
+function fill(d) {
+  var p = d;
+  while (p.depth > 1) p = p.parent;
+  var c = d3.lab(hue(p.name));
+  c.l = luminance(d.sum);
+  return c;
+}
+
+function arcTween(b) {
+  var i = d3.interpolate(this._current, b);
+  this._current = i(0);
+  return function(t) {
+    return arc(i(t));
+  };
+}
+
+function updateArc(d) {
+  return {depth: d.depth, x: d.x, dx: d.dx};
+}
+var legend = d3.select("#legend")
+  function update_legend(d)
+    {
+      //alert(d.name);
+      if(d.score>=0)
+        legend.html("<p><p><p><p><h2>"+d.name+"</h2><p> score:"+d.score+"</p>");
+      else legend.html("<p><p><p><p><h2>Genre:"+d.name+"</h2>");
+      legend.transition().duration(200).style("opacity","1");
+        str=d.name;
+        str=replacefun(str);
+        d3.selectAll("."+str)
+            .style("opacity",0.2);
+  //  legend.attr("display", function(d) { return (d.type == "holder" ? "none" : null); }); // hide text from holder elements
+    }
+  
+    function remove_legend(d)
+    {
+        legend.transition().duration(1000).style("opacity","0");
+        str=d.name;
+        str=replacefun(str);
+        d3.selectAll("."+str)
+            .style("opacity",1);
+//        legend.html("<h2>&nbsp;</h2>")
+    }
+    /*function hover_effect(d){
+      alert(dania);
+      d3.selectAll("."+d.name)
+            .style("fill","red");
+    }*/
+    function replacefun(str){
+          str=str.replace('?', '-');
+          str=str.replace(')', '-');
+          str=str.replace('(', '-');
+          str=str.replace('/', '-');
+          str=str.replace(' ', '-');
+          str=str.replace(' ', '-');
+          str=str.replace(' ', '-');
+          str=str.replace(' ', '-');
+          str=str.replace(' ', '-');
+          str=str.replace(' ', '-');
+          str=str.replace(' ', '-');
+          str=str.replace(' ', '-');
+          str=str.replace('.', '-');
+          str=str.replace(',', '-');
+          str=str.replace(',', '-');
+          str=str.replace('.', '-');
+          str=str.replace('.', '-');
+          str=str.replace(':', '-');
+          str=str.replace(':', '-');
+          str=str.replace('!', '-');
+          str=str.replace('&', '-');
+          str=str.replace('*', '-');
+          str=str.replace('1', '-');
+          str=str.replace("'", '-');
+          str=str.replace('2', '-');
+          str=str.replace('3', '-');
+          str=str.replace('4', '-');
+          str=str.replace('5', '-');
+          str=str.replace('6', '-');
+          str=str.replace('7', '-');
+          str=str.replace('8', '-');
+          str=str.replace('9', '-');
+          return str;
+    }
+
+d3.select(self.frameElement).style("height", margin.top + margin.bottom + "px");
+
+</script>
