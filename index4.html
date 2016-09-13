@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../docs-assets/ico/favicon.png">
+
+    <title>DATA VISUALIZATION </title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+
+
+    <!-- Custom styles for this template -->
+    <link href="assets/css/main.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="assets/js/hover.zoom.js"></script>
+    <script src="assets/js/hover.zoom.conf.js"></script>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+      <style>
+        body {
+          font-family: helvetica;
+        }
+		#graphh{
+			floart:right;
+			display:inline;
+		}
+		svg{
+			display:inline;
+		}
+        
+        h2 {
+          color: black;
+          text-align: center;
+        }
+
+        .axis {
+          font-family: arial;
+          font-size: 0.6em;
+        }
+        
+        .axis text {
+          stroke: none;
+          fill: black;
+        }
+
+        path {
+          fill: none;
+          stroke: black;
+          stroke-width: 2px;
+        }
+
+        .tick {
+          fill: none;
+          stroke: black;
+          stroke-width: 1px;
+        }
+
+        circle {
+          opacity: 0.6;
+          stroke: none;
+        }
+
+        .line_plot {
+          fill: none;
+          stroke: #4eb0bb;
+          stroke-width: 1px;
+        }
+		div.tooltip {	
+			position: absolute;			
+			text-align: left;			
+			width: 250px;					
+			height: 200px;					
+			padding: 2px;				
+			font: 12px;		
+			background: black;	
+			color:white;
+			border: 0px;		
+			border-radius: 8px;			
+			pointer-events: none;
+			text-decoration	:white;	
+			margin:0px;
+			
+		}
+		div.tooltip h2{
+			text-decoration	:white;
+			color:white;
+			text-align: center;	
+			font-size:20px;
+			margin-bottom:0px;
+			margin-top:4px;
+			padding-bottom:0px;
+			padding-top:4px;
+		}
+		div.tooltip h5{
+			text-decoration	:white;
+			color:white;
+			text-align: center;	
+			font-size:10px;
+			margin-bottom:0px;
+			margin-top:0px;
+		}
+		div.tooltip h4{
+			text-decoration	:white;
+			color:white;
+			text-align: left;	
+			font-size:14px;
+			margin-left:3px;
+			margin-top:9px;
+			margin-bottom:9px;
+		}
+		ul li{
+			margin-right:80px;	
+				margin-top:20px;
+		}
+		.circle{
+			cursor: pointer;
+		}
+		.hover{
+		
+		}
+		.label {
+		  fill: #777;
+		}
+
+		.year.label {
+		  font: 500 196px "Helvetica Neue";
+		  fill: #ddd;
+		}
+
+		.year.label.active {
+		  fill: #aaa;
+		}
+
+		text {
+  font: 10px sans-serif;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+  cursor: ew-resize;
+}
+.Action{
+  background-color: #1f77b4;
+  }
+.Documentary{
+  background-color: #aec7e8;
+  }
+.Adventure{
+  background-color: #ff7f0e;
+  }
+.Drama{
+  background-color: #ffbb78;
+  }
+.Animation{
+  background-color: #2ca02c;
+  }
+.Comedy{
+  background-color: #98df8a;
+  }
+.Mystery{
+  background-color: #d62728;
+  }
+.Fantasy{
+  background-color: #ff9896;
+  }
+.Crime{
+  background-color: #9467bd;
+  }
+.Biography{
+  background-color: #c5b0d5;
+  }
+.Sci-Fi{
+  background-color: #8c564b;
+  }
+.Horror{
+  background-color: #c49c94;
+  }
+.Romance{
+  background-color: #e377c2;
+  }
+.Thriller{
+  background-color: #f7b6d2;
+  }
+.Game-Show{
+  background-color: #7f7f7f;
+  }
+.Family{
+  background-color: #c7c7c7;
+  }
+.Music{
+  background-color: #bcbd22;
+  }
+.Western{
+  background-color: #dbdb8d;
+  }
+.Musical{
+  background-color: #17becf;
+  }
+.Film-Noir{
+  background-color: #9edae5;
+  }
+.History{
+  background-color: #1f77b4;
+  }
+ul{
+  list-style: none;
+  display:inline;
+  float:right;
+  margin-right:30px;
+}
+.action{
+  background-color: red;
+}
+ul h6{
+  margin-left: 20px;
+}
+li{
+    width: 20px;
+    height: 20px;
+    box-shadow: grey 0px 1px 3px 0px;
+    border-radius: 2px;
+}
+
+      </style>
+
+    <script type="text/javascript">
+
+      format = d3.time.format("%d-%m-%Y (%H:%M h)");
+
+
+      function draw(newdata,year1) {
+              //alert(data[0].genres);
+		data=newdata;
+      data.forEach(function(d) {
+      if(!d.title_year){
+          d.title_year=1917;
+        }
+      });
+
+	 function sortData(data)
+	 {
+		var data2=data.sort(function(a,b) { return +a.imdb_score - +b.imdb_score; });
+		return data2;
+	 }
+	 var max=0;
+	 var maximdb=0;
+	 data.forEach(function(d) {
+		if(d.budget){
+		  if(d.budget>max&&d.title_year==year1){
+			  max=d.budget;
+			}
+			if(d.imdb_score>maximdb&&d.title_year==year1){
+			  maximdb=d.imdb_score;
+			}
+		}
+      });
+	 
+	 var min=max;
+	 var minimdb=maximdb;
+
+	 data.forEach(function(d) {
+		  if(d.budget<min&&d.title_year==year1){
+			  min=d.budget;
+			}
+		if(d.imdb_score<minimdb&&d.title_year==year1){
+          minimdb=d.imdb_score;
+        }
+      });
+	  
+
+          "use strict";
+          var margin = 75,
+              width = 1350 - margin,
+              height = 650 - margin;
+
+          var radius = 3,
+              multiplier = 2;
+
+          d3.select("graphh")
+              .append("h2")
+              .text("movie");
+
+          var svg = d3.select("graphh")
+              .append("svg")
+              .attr("width", width + margin)
+              .attr("height", height + margin);
+
+          /*
+          Dimple.js Chart construction code
+          */
+			var cnt=0;
+          d3.select('svg')
+              .selectAll("circle")
+              .data((data).filter(
+				function(d){
+					if(d.title_year==year1)
+					{
+						cnt=cnt+1;
+						//alert(cnt);
+					}
+						
+					return d.title_year == year1;}))
+              .enter()
+              .append("circle");
+			  
+			  
+			  
+
+
+          var time_extent = d3.extent(data, function(d) {
+              return d['date'];
+          });
+  
+			  
+			
+          var time_scale = d3.time.scale()
+              .range([margin, width-50])
+              .domain([min,max]);
+
+          var count_extent = d3.extent(data, function(d) {
+              return d['attendance'];
+          });
+          var radiusScale = d3.scale.sqrt().domain([0, 999]).range([0, 2]);
+
+          var count_scale = d3.scale.linear()
+              .range([height, margin])
+              .domain([minimdb,maximdb]);
+
+          var time_axis = d3.svg.axis()
+              .scale(time_scale)
+			  .orient("bottom")
+              .ticks(d3.time.years, 4);
+			
+          d3.select("svg")
+              .append('g')
+              .attr('class', 'x axis')
+              .attr('transform', "translate(0," + height + ")")
+              .call(time_axis);
+
+          var count_axis = d3.svg.axis()
+              .scale(count_scale)
+              .orient("left")
+			  .ticks(5);
+
+          d3.select("svg")
+              .append('g')
+              .attr('id', 'yaxis')
+              .attr('transform', "translate(" + margin + ",0)")
+              .call(count_axis);
+
+              colorScale = d3.scale.category20();
+			  var div = d3.select("body").append("div")	
+							.attr("class", "tooltip")				
+							.style("opacity", 0);
+
+
+          d3.selectAll('circle')
+              .attr('cx', function(d) {
+                  return time_scale(d.budget);
+              })
+              .attr('cy', function(d) {
+                  return count_scale(d.imdb_score);
+              })
+              .attr('r',10)
+              .attr('fill',  function(d) {
+                  return colorScale(d.genres1);
+              })
+			  .attr('class', 'circle') 
+			  .style("stroke","black")
+			  .attr('transform', "translate(" + margin + ",0)")
+			 .on("mouseover", function(d) {	
+				d3.select(this).style("opacity", 1);
+									
+				div.transition()		
+					.duration(200)		
+					.style("opacity", .9);		
+				div	.html("<h2>"+d.movie_title + "<h2/><br/><h5>Duration:"+d.duration+"<br/>Year:"+d.title_year+"</h5><h4><u>Director:</u> "  + d.director_name+"<br/><u>Actors:</u> "+d.actor_1_name+", "+d.actor_2_name+"</h4>")	
+					.style("left", (d3.event.pageX-100) + "px")		
+					.style("top", (d3.event.pageY + 20) + "px");
+					str=d.genres1;
+					//str=replacefun(str);
+					d3.selectAll("."+str)
+						.style("opacity",0.2);
+				})					
+			.on("mouseout", function(d) {
+				d3.select(this).style("opacity", 0.6);			
+				div.transition()		
+					.duration(500)		
+					.style("opacity", 0);	
+					str=d.genres1;
+					//str=replacefun(str);
+					d3.selectAll("."+str)
+						.style("opacity",1);
+			});
+
+
+  var overlay = svg.append("rect")
+        .attr("class", "overlay")
+        .attr("x", box.x)
+        .attr("y", box.y)
+        .attr("width", box.width)
+        .attr("height", box.height)
+        .on("mouseover", enableInteraction);
+
+
+      };
+    </script>
+  </head>
+<body>
+    <!-- Static navbar -->
+    <div class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">DATA VISUALIZATION</a>
+        </div>
+        <div class="navbar-collapse collapse">
+
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+		<div id="graphh">
+		</div>
+		<div class="textt">
+		</div>
+		<div id="c20"></div>
+  <script type="text/javascript">
+	
+  
+ 
+
+  /*
+    Use D3 (not dimple.js) to load the TSV file
+    and pass the contents of it to the draw function
+    */	var margin = 75,
+              width = 1050 - margin,
+              height = 650 - margin;
+
+		var svg1 = d3.select("body")
+              .append("svg")
+              .attr("width", width + margin)
+              .attr("height", height + margin)
+              //.append('g')
+              .attr('class', 'chart');
+
+			var label = svg1.append("text")
+			.attr("class", "year label")
+			.attr("text-anchor", "end")
+			.attr("y", height - 24)
+			.attr("x", width)
+			.text(1916);
+			var box1 = label.node().getBBox();
+			var year=2016;
+  /*d3.csv("movie_metadata.csv", function(error, data) {
+			draw(1916);
+		});*/
+
+  var overlay = svg1.append("rect")
+        .attr("class", "overlay")
+        .attr("x", box1.x)
+        .attr("y", box1.y)
+        .attr("width", box1.width)
+        .attr("height", box1.height)
+        .on("mouseover", enableInteraction);
+	  // Start a transition that interpolates the data based on year.
+			svg1.transition()
+			  .duration(30000)
+			  .ease("linear")
+			  .tween("year", tweenYear)
+			  .each("end", enableInteraction);
+
+			function tweenYear() {
+				year = d3.interpolateNumber(1916, 2016);
+			  }
+			  
+ function enableInteraction() {
+ 
+
+    var yearScale = d3.scale.linear()
+        .domain([1916, 2016])
+        .range([box1.x + 10, box1.x + box1.width - 10])
+        .clamp(true);
+
+    // Cancel the current transition, if any.
+    svg1.transition().duration(1);
+
+    overlay
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
+        .on("mousemove", mousemove)
+        .on("touchmove", mousemove)
+		.on("click",mouseclickk);
+
+    function mouseover() {
+      label.classed("active", true);
+    }
+
+    function mouseout() {
+      label.classed("active", false);
+    }
+	//var year2=2016;
+    function mousemove() {
+      displayYear(yearScale.invert(d3.mouse(this)[0]));
+	  year2=yearScale.invert(d3.mouse(this)[0]);
+
+    }
+	  	function mouseclickk(){
+		//alert(d3.selectAll('g').attr('class', 'tick').selectAll('text'));
+		var legend = d3.selectAll('circle').remove();
+		d3.select("graphh").selectAll('text').remove();
+		 d3.selectAll('x axis').remove();
+		 d3.selectAll('g').attr('class', 'tick').remove();
+		//alert(Math.round(year2));
+		  d3.csv("movie_metadata.csv", function(error, data) {
+			draw(data,Math.round(year2));
+		});	
+	}
+
+	  function displayYear(year) {
+    label.text(Math.round(year));
+	}
+  }
+  
+  
+        var names=[];
+        names[0]="Action";
+        names[1]="Documentary";
+        names[2]="Adventure";
+        names[3]="Drama";
+        names[4]="Animation";
+        names[5]="Comedy";
+        names[6]="Mystery";
+        names[7]="Fantasy";
+        names[8]="Crime";
+        names[9]="Biography";
+        names[10]="Sci-Fi";
+        names[11]="Horror";
+        names[12]="Romance";
+        names[13]="Thriller";
+        names[14]="Game-Show";
+        names[15]="Family";
+        names[16]="Music";
+        names[17]="Western";
+        names[18]="Musical";
+        names[19]="Film-Noir";
+        names[20]="History";
+  
+      var legend3 =d3.select("#c20");
+		hue2 = d3.scale.category20();
+      textg= '<div class="gender-menu">';
+      textg=textg+'<ul class="list-style">';
+      for(i=0;i<21;i++){
+          
+          colo="black";
+          textg=textg+'<li class="'+names[i]+'"  bgcolor="'+colo+'"><h6>';
+          textg=textg+"</br> "+names[i] ;
+          textg=textg+'</h6></li>';
+          legend3.html(textg);
+		  
+          //hue2 = d3.scale.category10();
+		  //alert(names[i]);
+		  //alert(hue2(names[i]));
+		  
+
+      }
+
+	 
+
+			    // After the transition finishes, you can mouseover to change the year.
+		
+
+  
+
+
+  </script>
+</body>
+</html>
